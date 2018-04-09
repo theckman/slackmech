@@ -1,0 +1,16 @@
+<form id="signin_form" action="/" method="post" accept-encoding="UTF-8">
+  <input type="hidden" name="signin" value="1">
+  <input type="hidden" name="redir" value="/customize/emoji">
+  <p class="browser_password align_left">Enter your <strong>email address</strong> and <strong>password</strong>.</p>
+  <p class="ssb_password hidden">What is your <strong>password</strong>?</p>
+  <p class=" no_bottom_margin">
+    <input type="email" id="email" name="email" size="40" value="" placeholder="you@example.com">
+  </p>
+  <p class=" small_bottom_margin">
+    <input type="password" id="password" name="password" size="40" placeholder="password" >
+  </p>
+  <p><button id="signin_btn" type="submit" class="btn btn_large full_width ladda-button" data-style="expand-right"><span class="ladda-label">Sign in</span></button></p>
+  <div class="align_left">
+    <label class="checkbox normal inline_block small_right_margin"><input type="checkbox" name="remember" checked> Remember me</label>
+  </div>
+</form>
