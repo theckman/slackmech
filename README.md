@@ -1,5 +1,10 @@
-# slack-mech
-[![GoDoc](https://img.shields.io/badge/godoc-reference-blue.svg?style=flat)](https://godoc.org/github.com/theckman/slackmech)
+# slackmech
+[![License](https://img.shields.io/github/license/theckman/slackmech.svg)](https://github.com/theckman/slackmech/blob/master/LICENSE)
+[![GoDoc Page](https://img.shields.io/badge/godoc-reference-blue.svg?style=flat)](https://godoc.org/github.com/theckman/slackmech)
+[![Latest Git Tag](https://img.shields.io/github/tag/theckman/slackmech.svg)](https://github.com/theckman/slackmech/releases)
+[![TravisCI master Branch Build Status](https://img.shields.io/travis/theckman/slackmech/master.svg)](https://travis-ci.org/theckman/slackmech/branches)
+[![Go Cover Test Coverage](https://gocover.io/_badge/github.com/theckman/slackmech?v0)](https://gocover.io/github.com/theckman/slackmech)
+[![Go Report Card](https://goreportcard.com/badge/github.com/theckman/slackmech)](https://goreportcard.com/report/github.com/theckman/slackmech)
 
 Package `slackmech` is a package for mechanizing requests to the Slack API. It
 helps imitate a web session with Slack, to present you with a session API token.
