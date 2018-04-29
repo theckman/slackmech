@@ -240,7 +240,7 @@ func TestClient_getSessionDetails(t *testing.T) {
 		e string
 	}{
 		{n: "invalid_url", s: "://\\!~", e: "missing protocol scheme"},
-		{n: "dead_server", s: "http://127.42.1.1:43852", e: `failed to get "http://127.42.1.1:43852/messages": Get http://127.42.1.1:43852/messages: dial tcp 127.42.1.1:43852: i/o timeout`},
+		{n: "dead_server", s: "http://127.42.1.1:43852", e: `failed to get "http://127.42.1.1:43852/messages": Get http://127.42.1.1:43852/messages: dial tcp 127.42.1.1:43852: `},
 		{n: "invalid_response_code", u: "/bad_response_code", e: "unexpected HTTP response status: 302 Found"},
 		{n: "response_missing_api_token", u: "/missing_api_token", e: "unable to find api_token in response"},
 		{n: "valid_response"},
