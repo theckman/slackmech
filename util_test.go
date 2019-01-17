@@ -13,7 +13,7 @@ import (
 	"testing"
 )
 
-const expectedUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.11; rv:60.0) Gecko/20100101 Firefox/60.0"
+const expectedUserAgent = `Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:65.0) Gecko/20100101 Firefox/65.0`
 
 func Test_getUA(t *testing.T) {
 	req, err := http.NewRequest(http.MethodGet, "http://locahost", nil)
