@@ -424,6 +424,7 @@ func TestClient_logIn(t *testing.T) {
 		ldc string // LoginDetails.Crumb
 		ldr string // LoginDetails.Redir
 		lds string // LoginDetails.Signin
+		ldh string // LoginDetails.HasRemember
 		loc string
 		err string
 	}{
@@ -438,47 +439,61 @@ func TestClient_logIn(t *testing.T) {
 		{
 			n: "no_crumb", e: tdLoginEmail, p: tdLoginPassword,
 			ldr: tdLoginDetailsRedir, lds: tdLoginDetailsSignin,
+			ldh: tdLoginDetailsHasRemember,
 			err: "LoginDetails must contain a crumb value",
 		},
 		{
-			n: "no_crumb", e: tdLoginEmail, p: tdLoginPassword,
+			n: "no_signin", e: tdLoginEmail, p: tdLoginPassword,
 			ldc: tdLoginDetailsCrumb, ldr: tdLoginDetailsRedir,
+			ldh: tdLoginDetailsHasRemember,
 			err: "LoginDetails must contain a signin value",
+		},
+		{
+			n: "no_has_remember", e: tdLoginEmail, p: tdLoginPassword,
+			ldc: tdLoginDetailsCrumb, ldr: tdLoginDetailsRedir,
+			lds: tdLoginDetailsSignin,
+			err: "LoginDetails must contain a has_remember value",
 		},
 		{
 			n: "bad_url", u: ":\\//!@~",
 			e: tdLoginEmail, p: tdLoginPassword,
-			ldc: tdLoginDetailsCrumb, ldr: tdLoginDetailsRedir, lds: tdLoginDetailsSignin,
+			ldc: tdLoginDetailsCrumb, ldr: tdLoginDetailsRedir,
+			lds: tdLoginDetailsSignin, ldh: tdLoginDetailsHasRemember,
 			err: "missing protocol scheme",
 		},
 		{
 			n: "bad_response_code", u: server.URL + "/bad_response_code",
 			e: tdLoginEmail, p: tdLoginPassword,
-			ldc: tdLoginDetailsCrumb, ldr: tdLoginDetailsRedir, lds: tdLoginDetailsSignin,
+			ldc: tdLoginDetailsCrumb, ldr: tdLoginDetailsRedir,
+			lds: tdLoginDetailsSignin, ldh: tdLoginDetailsHasRemember,
 			err: "unexpected HTTP response when logging in (400 Bad Request)",
 		},
 		{
 			n: "another_bad_response_code", u: server.URL + "/another_bad_response_code",
 			e: tdLoginEmail, p: tdLoginPassword,
-			ldc: tdLoginDetailsCrumb, ldr: tdLoginDetailsRedir, lds: tdLoginDetailsSignin,
+			ldc: tdLoginDetailsCrumb, ldr: tdLoginDetailsRedir,
+			lds: tdLoginDetailsSignin, ldh: tdLoginDetailsHasRemember,
 			err: "unexpected HTTP response when logging in (508 Loop Detected)",
 		},
 		{
 			n: "bad_login_credential", u: server.URL + "/signin",
 			e: tdLoginEmail, p: "invalid pass",
-			ldc: tdLoginDetailsCrumb, ldr: tdLoginDetailsRedir, lds: tdLoginDetailsSignin,
+			ldc: tdLoginDetailsCrumb, ldr: tdLoginDetailsRedir,
+			lds: tdLoginDetailsSignin, ldh: tdLoginDetailsHasRemember,
 			err: fmt.Sprintf("invalid Slack credentials for %q", server.URL+"/signin"),
 		},
 		{
 			n: "invalid_crumb", u: server.URL + "/signin",
 			e: tdLoginEmail, p: tdLoginPassword,
-			ldc: "invalid crumb", ldr: tdLoginDetailsRedir, lds: tdLoginDetailsSignin,
+			ldc: "invalid crumb", ldr: tdLoginDetailsRedir,
+			lds: tdLoginDetailsSignin, ldh: tdLoginDetailsHasRemember,
 			err: fmt.Sprintf("failed to log in to %q for unknown reason", server.URL+"/signin"),
 		},
 		{
 			n: "valid_credentials_unexpected_redirect", u: server.URL + "/signin_unknown_redir",
 			e: tdLoginEmail, p: tdLoginPassword,
-			ldc: tdLoginDetailsCrumb, ldr: "", lds: tdLoginDetailsSignin,
+			ldc: tdLoginDetailsCrumb, ldr: "",
+			lds: tdLoginDetailsSignin, ldh: tdLoginDetailsHasRemember,
 			err: fmt.Sprintf(
 				"unexpected HTTP redirect location header value when logging in (%q)",
 				`https://slack.com/chuckcookie?redir=https%3A%2F%2Ftest.slack.com%2F`,
@@ -487,7 +502,8 @@ func TestClient_logIn(t *testing.T) {
 		{
 			n: "valid_credentials", u: server.URL + "/signin",
 			e: tdLoginEmail, p: tdLoginPassword,
-			ldc: tdLoginDetailsCrumb, ldr: "", lds: tdLoginDetailsSignin,
+			ldc: tdLoginDetailsCrumb, ldr: "",
+			lds: tdLoginDetailsSignin, ldh: tdLoginDetailsHasRemember,
 			loc: `https://slack.com/checkcookie?redir=https%3A%2F%2Ftest.slack.com%2F`,
 		},
 	}
@@ -501,7 +517,9 @@ func TestClient_logIn(t *testing.T) {
 			var loc string
 			var err error
 
-			loc, err = c.logIn(tt.e, tt.p, LoginDetails{Crumb: tt.ldc, Redir: tt.ldr, Signin: tt.lds})
+			ld := LoginDetails{Crumb: tt.ldc, Redir: tt.ldr, Signin: tt.lds, HasRemember: tt.ldh}
+
+			loc, err = c.logIn(tt.e, tt.p, ld)
 			if err != nil {
 				if len(tt.err) > 0 {
 					if strings.Contains(err.Error(), tt.err) {

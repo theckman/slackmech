@@ -14,13 +14,14 @@ import (
 	"golang.org/x/net/html/atom"
 )
 
-// LoginDetails is a struct to contain the hidden presented by Slack on their
-// login form. Some of these fields are needed for logging in, so this can be
-// used to present them back.
+// LoginDetails is a struct to contain the hidden fields presented by Slack on
+// their login form. Some of these fields are needed for logging in, so this can
+// be used to present them back.
 type LoginDetails struct {
-	Crumb  string
-	Redir  string
-	Signin string
+	Crumb       string
+	Redir       string
+	Signin      string
+	HasRemember string
 }
 
 func (c *Client) getLoginDetails() (LoginDetails, bool, error) {
@@ -99,6 +100,8 @@ func parseLoginDetails(r io.Reader) (LoginDetails, error) {
 			ld.Redir = attribs["value"]
 		case "signin":
 			ld.Signin = attribs["value"]
+		case "has_remember":
+			ld.HasRemember = attribs["value"]
 		default:
 			// not a known tag, move on
 			continue

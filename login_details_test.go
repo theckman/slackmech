@@ -20,9 +20,10 @@ const (
 )
 
 const (
-	tdLoginDetailsCrumb  = `s-1523681453-a17c4e9381e3df00d5e13491ef4608bde2b0f4c7c185fe5ed080b2339920b2f3-☃`
-	tdLoginDetailsRedir  = `/customize/emoji`
-	tdLoginDetailsSignin = `1`
+	tdLoginDetailsCrumb       = `s-1523681453-a17c4e9381e3df00d5e13491ef4608bde2b0f4c7c185fe5ed080b2339920b2f3-☃`
+	tdLoginDetailsRedir       = `/customize/emoji`
+	tdLoginDetailsSignin      = `1`
+	tdLoginDetailsHasRemember = `2`
 )
 
 func Test_parseLoginDetails(t *testing.T) {
@@ -73,6 +74,10 @@ func Test_parseLoginDetails(t *testing.T) {
 
 			if ld.Signin != tdLoginDetailsSignin {
 				t.Fatalf("ld.Signin = %q, want %q", ld.Signin, tdLoginDetailsSignin)
+			}
+
+			if ld.HasRemember != tdLoginDetailsHasRemember {
+				t.Fatalf("ld.HasRemember' = %q, want %q", ld.HasRemember, tdLoginDetailsHasRemember)
 			}
 		})
 	}
