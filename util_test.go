@@ -123,7 +123,7 @@ func Test_postFormReq(t *testing.T) {
 				t.Fatalf(`r.Header.Get("Content-Type") = %q, want expectedUserAgent`, ct)
 			}
 
-			defer r.Body.Close()
+			defer func() { _ = r.Body.Close() }()
 
 			body, err := ioutil.ReadAll(r.Body)
 			if err != nil {

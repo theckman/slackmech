@@ -47,7 +47,7 @@ func Test_parseLoginDetails(t *testing.T) {
 				t.Fatalf("failed to open %q: %s", tt.fn, err)
 			}
 
-			defer f.Close()
+			defer func() { _ = f.Close() }()
 
 			ld, err = parseLoginDetails(f)
 			if err != nil {
@@ -162,12 +162,12 @@ func muxGetLoginDetails(t *testing.T) *http.ServeMux {
 
 	mux.HandleFunc("/bad_response_code", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
-		io.WriteString(w, "SHOULD CAUSE ERROR")
+		_, _ = io.WriteString(w, "SHOULD CAUSE ERROR") // appease errcheck
 	})
 
 	mux.HandleFunc("/another_bad_response_code", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusLoopDetected)
-		io.WriteString(w, "SHOULD CAUSE ERROR")
+		_, _ = io.WriteString(w, "SHOULD CAUSE ERROR") // appease errcheck
 	})
 
 	mux.HandleFunc("/logged_in", func(w http.ResponseWriter, r *http.Request) {
@@ -184,7 +184,7 @@ func muxGetLoginDetails(t *testing.T) *http.ServeMux {
 			t.Fatalf("failed to open %q: %q", tdLoginDetails, err)
 		}
 
-		defer f.Close()
+		defer func() { _ = f.Close() }()
 
 		if _, err = io.Copy(w, f); err != nil {
 			t.Fatalf("failed to write body: %s", err)
@@ -197,7 +197,7 @@ func muxGetLoginDetails(t *testing.T) *http.ServeMux {
 			t.Fatalf("failed to open %q: %q", tdLoginDetailsMissingCrumb, err)
 		}
 
-		defer f.Close()
+		defer func() { _ = f.Close() }()
 
 		if _, err = io.Copy(w, f); err != nil {
 			t.Fatalf("failed to write body: %s", err)

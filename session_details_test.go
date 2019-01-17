@@ -34,11 +34,13 @@ func Test_formatLogoutURL(t *testing.T) {
 		},
 	}
 
+	var formatted string
+
 	for _, tt := range tests {
 		tt := tt
 
 		t.Run(tt.n, func(t *testing.T) {
-			var formatted string = formatLogoutURL(tt.i)
+			formatted = formatLogoutURL(tt.i)
 
 			if formatted != tt.o {
 				t.Errorf("formatLogoutURL(%q) = %q, want %q", tt.i, formatted, tt.o)
@@ -53,7 +55,7 @@ func Test_parseInlineJsValue(t *testing.T) {
 		t.Fatalf("error opening ./testdata/session_details.html: %s", err)
 	}
 
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	p, err := ioutil.ReadAll(f)
 	if err != nil {
@@ -104,7 +106,7 @@ func Test_parseInlineJsValue(t *testing.T) {
 // constants for paths to session details mock HTML files
 const (
 	tdSessionDetails                 = "./testdata/session_details.html"
-	tdSessionDetailsMissingToken     = "./testdata/session_details_missing_token.html"
+	tdSessionDetailsMissingToken     = "./testdata/session_details_missing_token.html" /* #nosec */
 	tdSessionDetailsMissingTS        = "./testdata/session_details_missing_ts.html"
 	tdSessionDetailsMissingUID       = "./testdata/session_details_missing_uid.html"
 	tdSessionDetailsMissingLogoutURL = "./testdata/session_details_missing_logout_url.html"
@@ -113,7 +115,7 @@ const (
 
 // constants for the important values from the session details mock HTML
 const (
-	tdSessionToken      = "xoxs-334538486097-REDACTED"
+	tdSessionToken      = "xoxs-334538486097-REDACTED" /* #nosec */
 	tdSessionVersionTS  = "1523401638"
 	tdSessionVersionUID = "960e24c8dab464c657ca8fd7318a5b5033fdc962"
 	tdSessionLogoutURL  = `https://slack.com/signout/334538486097?crumb=s-1523401174-affe372c8bde699088fc69fb5bbb9ce5aed6455a7f70ca04e3bb52c06984a263-%E2%98%83`
@@ -182,7 +184,7 @@ func Test_parseSessionDetails(t *testing.T) {
 					t.Fatalf("failed to open %q: %s", tt.fn, err)
 				}
 
-				defer f.Close()
+				defer func() { _ = f.Close() }()
 
 				r = f
 			}
@@ -308,7 +310,7 @@ func muxGetSessionDetails(t *testing.T) *http.ServeMux {
 			t.Fatalf("failed to open %q: %s", tdSessionDetailsMissingToken, err)
 		}
 
-		defer f.Close()
+		defer func() { _ = f.Close() }()
 
 		if _, err = io.Copy(w, f); err != nil {
 			t.Fatalf("failed to write body: %s", err)
@@ -320,7 +322,7 @@ func muxGetSessionDetails(t *testing.T) *http.ServeMux {
 			t.Fatalf("failed to open %q: %s", tdSessionDetailsMissingToken, err)
 		}
 
-		defer f.Close()
+		defer func() { _ = f.Close() }()
 
 		if _, err = io.Copy(w, f); err != nil {
 			t.Fatalf("failed to write body: %s", err)
