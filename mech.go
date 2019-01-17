@@ -114,7 +114,7 @@ func (c *Client) shouldRedirect(url, newLocation string) error {
 		return errors.Wrapf(err, "failed to make GET request to %q", url)
 	}
 
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusFound {
 		return errors.Errorf("%q did not redirect as expected (%s)", url, resp.Status)
@@ -237,24 +237,24 @@ func (c *Client) StartSession(email, password string) error {
 		// HTTP 302 redirect us to the checkcookie endpoint. This function
 		// returns a path to check the cookie endpoint with the redir query
 		// parameter appended.
-		checkCookiePath, err := c.logIn(email, password, ld)
-		if err != nil {
-			return errors.Wrap(err, "failed to log in")
+		checkCookiePath, lerr := c.logIn(email, password, ld)
+		if lerr != nil {
+			return errors.Wrap(lerr, "failed to log in")
 		}
 
 		// The checkcookie endpoint verifies the cookie, and should redirect us
 		// back to the Slack workspace's endpoint. If there is no valid cookie,
 		// we get served an HTTP 200, which results in an error here.
-		if err := c.shouldRedirect(checkCookiePath, c.endpoint+"/"); err != nil {
-			return errors.Wrap(err, "cookie validation failed")
+		if rerr := c.shouldRedirect(checkCookiePath, c.endpoint+"/"); rerr != nil {
+			return errors.Wrap(rerr, "cookie validation failed")
 		}
 
 		// If the checkcookie endpoint succeeded in redirecting us to the main
 		// page (no error above), we can now make sure c.endpoint redirects us
 		// to the /messages resource. We must verify this, as our session token
 		// is on that page.
-		if err := c.shouldRedirect(c.endpoint, "/messages"); err != nil {
-			return errors.Wrap(err, "main page to /messages redirect didn't happen")
+		if rerr := c.shouldRedirect(c.endpoint, "/messages"); rerr != nil {
+			return errors.Wrap(rerr, "main page to /messages redirect didn't happen")
 		}
 	}
 
@@ -311,7 +311,7 @@ func (c *Client) logIn(email, password string, ld LoginDetails) (string, error) 
 		return "", errors.Wrap(err, "failed to action log in request")
 	}
 
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	// handle the response from the server
 	// 302 (Found): log in attempt appears successful; do cookie validation

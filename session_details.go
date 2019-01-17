@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	apiTokenString   = `api_token: "`
+	apiTokenString   = `api_token: "` /* #nosec */
 	logOutURLString  = `boot_data.logout_url = "`
 	versionTSstring  = `version_ts: "`
 	versionUIDstring = `version_uid: "`
@@ -38,7 +38,7 @@ func (c *Client) getSessionDetails() (sessionDetails, error) {
 		return sessionDetails{}, errors.Wrapf(err, "failed to get %q", url)
 	}
 
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		return sessionDetails{}, errors.Errorf("unexpected HTTP response status: %s", resp.Status)

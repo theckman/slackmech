@@ -30,7 +30,7 @@ func (c *Client) getLoginDetails() (LoginDetails, bool, error) {
 		return LoginDetails{}, false, err
 	}
 
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }() // appease errcheck
 
 	switch resp.StatusCode {
 	default:

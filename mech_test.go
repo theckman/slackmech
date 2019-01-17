@@ -10,7 +10,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"net"
 	"net/http"
 	"net/http/cookiejar"
@@ -183,7 +182,7 @@ func TestClient_get(t *testing.T) {
 				t.Fatalf("unexpected error: %s", err)
 			}
 
-			defer resp.Body.Close()
+			defer func() { _ = resp.Body.Close() }()
 
 			if resp.StatusCode != 200 {
 				t.Errorf("unexpected HTTP response %q, want %d", resp.Status, http.StatusOK)
@@ -205,7 +204,7 @@ func muxGet(t *testing.T) *http.ServeMux {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) { http.NotFound(w, r) })
 	mux.HandleFunc("/test", getmw(func(w http.ResponseWriter, r *http.Request) {
-		io.WriteString(w, "ok!")
+		_, _ = io.WriteString(w, "ok!")
 	}))
 	mux.HandleFunc("/test_params", getmw(func(w http.ResponseWriter, r *http.Request) {
 		if err := r.ParseForm(); err != nil {
@@ -224,7 +223,7 @@ func muxGet(t *testing.T) *http.ServeMux {
 			return
 		}
 
-		io.WriteString(w, "ok!")
+		_, _ = io.WriteString(w, "ok!") // appease errcheck
 	}))
 
 	return mux
@@ -266,7 +265,7 @@ func TestClient_postForm(t *testing.T) {
 				t.Fatalf("unexpected error: %s", err)
 			}
 
-			defer resp.Body.Close()
+			defer func() { _ = resp.Body.Close() }()
 
 			if resp.StatusCode != 200 {
 				t.Errorf("unexpected HTTP response %q, want %d", resp.Status, http.StatusOK)
@@ -288,7 +287,7 @@ func muxPostForm(t *testing.T) *http.ServeMux {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) { http.NotFound(w, r) })
 	mux.HandleFunc("/test", postmw(t, func(w http.ResponseWriter, r *http.Request) {
-		io.WriteString(w, "ok!")
+		_, _ = io.WriteString(w, "ok!")
 	}))
 
 	mux.HandleFunc("/test_params", postmw(t, func(w http.ResponseWriter, r *http.Request) {
@@ -308,7 +307,7 @@ func muxPostForm(t *testing.T) *http.ServeMux {
 			return
 		}
 
-		io.WriteString(w, "ok!")
+		_, _ = io.WriteString(w, "ok!")
 	}))
 
 	return mux
@@ -337,11 +336,13 @@ func TestClient_shouldRedirect(t *testing.T) {
 		{n: "valid_url", u: server.URL + `/test?redir=%2Fredir`, l: "/redir"},
 	}
 
+	var err error
+
 	for _, tt := range tests {
 		tt := tt
 
 		t.Run(tt.n, func(t *testing.T) {
-			var err error = c.shouldRedirect(tt.u, tt.l)
+			err = c.shouldRedirect(tt.u, tt.l)
 			if err != nil {
 				if tt.e {
 					return
@@ -725,10 +726,12 @@ func TestClient_StartSession(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.n, func(t *testing.T) {
+			var err error
+
 			if tt.freshpots {
-				cj, err := cookiejar.New(&cookiejar.Options{PublicSuffixList: publicsuffix.List})
-				if err != nil {
-					t.Fatalf("error building cookiejar for fresh pots: %s", err)
+				cj, jerr := cookiejar.New(&cookiejar.Options{PublicSuffixList: publicsuffix.List})
+				if jerr != nil {
+					t.Fatalf("error building cookiejar for fresh pots: %s", jerr)
 				}
 				httpc.Jar = cj
 			}
@@ -741,7 +744,7 @@ func TestClient_StartSession(t *testing.T) {
 			ms.messagesFail = tt.mf
 			ms.checkcookieFail = tt.cf
 
-			var err error = c.StartSession(tt.e, tt.p)
+			err = c.StartSession(tt.e, tt.p)
 			if err != nil {
 				if len(tt.err) > 0 {
 					if strings.Contains(err.Error(), tt.err) {
@@ -764,12 +767,12 @@ func TestClient_StartSession(t *testing.T) {
 }
 
 func writeFileToWriter(path string, w io.Writer) error {
-	f, err := os.Open(path)
+	f, err := os.Open(path) /* #nosec */
 	if err != nil {
 		return errors.Errorf("failed to open %q: %s", tdStartSession, err)
 	}
 
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	if _, err = io.Copy(w, f); err != nil {
 		return errors.Errorf("failed to write body: %s", err)
@@ -802,7 +805,6 @@ func (m *mockSlack) root(w http.ResponseWriter, r *http.Request) {
 		if cookieValid(tdStartSessionCookieName, tdStartSessionCookieValue, r) {
 			if m.rootGetFailCookie {
 				http.Error(w, "request configured to fail", http.StatusInternalServerError)
-				log.Print("rip")
 				return
 			}
 
@@ -812,7 +814,6 @@ func (m *mockSlack) root(w http.ResponseWriter, r *http.Request) {
 
 		if m.rootGetFailNoCookie {
 			http.Error(w, "request configured to fail", http.StatusInternalServerError)
-			log.Print("rip")
 			return
 		}
 
