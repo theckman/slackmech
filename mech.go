@@ -289,13 +289,20 @@ func (c *Client) logIn(email, password string, ld LoginDetails) (string, error) 
 		return "", errors.New("LoginDetails must contain a signin value")
 	}
 
+	// make sure the has_remember value is provided
+	if len(ld.HasRemember) == 0 {
+		return "", errors.New("LoginDetails must contain a has_remember value")
+	}
+
 	// build the form data for the login POST request
 	v := url.Values{
-		"crumb":    []string{ld.Crumb},
-		"email":    []string{email},
-		"password": []string{password},
-		"redir":    []string{ld.Redir},
-		"signin":   []string{ld.Signin},
+		"crumb":        []string{ld.Crumb},
+		"email":        []string{email},
+		"password":     []string{password},
+		"redir":        []string{ld.Redir},
+		"signin":       []string{ld.Signin},
+		"has_remember": []string{ld.HasRemember},
+		"remember":     []string{"on"}, // we will not be forgotten
 	}
 
 	// post the form data to the login URL
