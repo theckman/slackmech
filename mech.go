@@ -7,6 +7,7 @@ package slackmech
 
 import (
 	"bytes"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -114,7 +115,11 @@ func (c *Client) shouldRedirect(url, newLocation string) error {
 		return errors.Wrapf(err, "failed to make GET request to %q", url)
 	}
 
-	defer func() { _ = resp.Body.Close() }()
+	defer func() {
+		// blank identifiers to appease errcheck
+		_, _ = io.Copy(ioutil.Discard, resp.Body)
+		_ = resp.Body.Close()
+	}()
 
 	if resp.StatusCode != http.StatusFound {
 		return errors.Errorf("%q did not redirect as expected (%s)", url, resp.Status)
@@ -311,7 +316,11 @@ func (c *Client) logIn(email, password string, ld LoginDetails) (string, error) 
 		return "", errors.Wrap(err, "failed to action log in request")
 	}
 
-	defer func() { _ = resp.Body.Close() }()
+	defer func() {
+		// blank identifiers to appease errcheck
+		_, _ = io.Copy(ioutil.Discard, resp.Body)
+		_ = resp.Body.Close()
+	}()
 
 	// handle the response from the server
 	// 302 (Found): log in attempt appears successful; do cookie validation

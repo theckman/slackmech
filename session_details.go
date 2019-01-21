@@ -38,7 +38,11 @@ func (c *Client) getSessionDetails() (sessionDetails, error) {
 		return sessionDetails{}, errors.Wrapf(err, "failed to get %q", url)
 	}
 
-	defer func() { _ = resp.Body.Close() }()
+	defer func() {
+		// blank identifiers to appease errcheck
+		_, _ = io.Copy(ioutil.Discard, resp.Body)
+		_ = resp.Body.Close()
+	}()
 
 	if resp.StatusCode != http.StatusOK {
 		return sessionDetails{}, errors.Errorf("unexpected HTTP response status: %s", resp.Status)
@@ -58,7 +62,7 @@ func parseInlineJsValue(p []byte, search string, end byte) (string, error) {
 	// get the index of the search value
 	i := bytes.Index(p, []byte(search))
 	if i < 0 {
-		return "", errors.Errorf("%q not found in byte slice", search)
+		return "", errors.Errorf("'%s' not found in byte slice", search)
 	}
 
 	// b is the index of the beginning of the value we want
