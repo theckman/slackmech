@@ -7,6 +7,7 @@ package slackmech
 
 import (
 	"io"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/pkg/errors"
@@ -30,7 +31,11 @@ func (c *Client) getLoginDetails() (LoginDetails, bool, error) {
 		return LoginDetails{}, false, err
 	}
 
-	defer func() { _ = resp.Body.Close() }() // appease errcheck
+	defer func() {
+		// blank identifiers to appease errcheck
+		_, _ = io.Copy(ioutil.Discard, resp.Body)
+		_ = resp.Body.Close()
+	}()
 
 	switch resp.StatusCode {
 	default:

@@ -69,7 +69,7 @@ func Test_parseInlineJsValue(t *testing.T) {
 		o   string
 		err string
 	}{
-		{n: "not_found", s: "somethingNotPresent", err: `"somethingNotPresent" not found in byte slice`},
+		{n: "not_found", s: "somethingNotPresent", err: `'somethingNotPresent' not found in byte slice`},
 		{n: "terminator_not_found", s: "api_token", e: '©', err: `did not find terminating byte ('©') in input`},
 		{n: "api_token", s: `api_token: "`, e: '"', o: "xoxs-334538486097-REDACTED"},
 	}
